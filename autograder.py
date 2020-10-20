@@ -11,7 +11,6 @@
 # Student side autograding was added by Brad Miller, Nick Hay, and
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
-#test
 # imports from python standard library
 import grading
 import imp
