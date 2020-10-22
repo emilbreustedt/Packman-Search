@@ -72,6 +72,55 @@ def tinyMazeSearch(problem):
     w = Directions.WEST
     return  [s, s, w, s, w, w, s, w]
 
+def generalGraphSearch(problem, structure):
+    """
+    Defines a general algorithm to search a graph.
+    Parameters are structure, which can be any data structure with .push() and .pop() methods, and problem, which is the
+    search problem.
+    """
+    # Push the root node/start into the data structure in this format: [(state, action taken, cost)]
+    # The list pushed into the structure for the second node will look something like this:
+    # [(root_state, "Stop", 0), (new_state, "North", 1)]
+    structure.push([(problem.getStartState(), "Stop", 0)])
+
+    # Initialise the list of visited nodes to an empty list
+    visited = []
+
+    # While the structure is not empty, i.e. there are still elements to be searched,
+    while not structure.isEmpty():
+        # get the path returned by the data structure's .pop() method
+        path = structure.pop()
+
+        # The current state is the first element in the last tuple of the path
+        # i.e. [(root_state, "Stop", 0), (new_state, "North", 1)][-1][0] = (new_state, "North", 1)[0] = new_state
+        curr_state = path[-1][0]
+
+        # if the current state is the goal state,
+        if problem.isGoalState(curr_state):
+            # return the actions to the goal state
+            # which is the second element for each tuple in the path, ignoring the first "Stop"
+            return [x[1] for x in path][1:]
+
+        # if the current state has not been visited,
+        if curr_state not in visited:
+            # mark the current state as visited by appending to the visited list
+            visited.append(curr_state)
+
+            # for all the successors of the current state,
+            for successor in problem.getSuccessors(curr_state):
+                # successor[0] = (state, action, cost)[0] = state
+                # if the successor's state is unvisited,
+                if successor[0] not in visited:
+                    # Copy the parent's path
+                    successorPath = path[:]
+                    # Set the path of the successor node to the parent's path + the successor node
+                    successorPath.append(successor)
+                    # Push the successor's path into the structure
+                    structure.push(successorPath)
+
+    # If search fails, return False
+    return False
+
 def depthFirstSearch(problem):
     """
     Search the deepest nodes in the search tree first.
@@ -86,18 +135,33 @@ def depthFirstSearch(problem):
     print "Is the start a goal?", problem.isGoalState(problem.getStartState())
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+  # Initialize an empty Stack
+    stack = util.Stack()
+    # DFS is general graph search with a Stack as the data structure
+    return generalGraphSearch(problem, stack)
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+        # Initialize an empty Queue
+    queue = util.Queue()
+
+    # BFS is general graph search with a Queue as the data structure
+    return generalGraphSearch(problem, queue)
+
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    # The cost for UCS only the backward cost
+    # get the actions in the path which are the second element for each tuple in the path, ignoring the first "Stop"
+    # calculate the cost of the actions specific to the Problem using problem.getCostOfActions
+    cost = lambda path: problem.getCostOfActions([x[1] for x in path][1:])
+
+    # Construct an empty priority queue that sorts using this backwards cost
+    pq = util.PriorityQueueWithFunction(cost)
+
+    # UCS is general graph search with the PriorityQueue sorting by the cost as the data structure
+    return generalGraphSearch(problem, pq)
 
 def nullHeuristic(state, problem=None):
     """
@@ -108,8 +172,18 @@ def nullHeuristic(state, problem=None):
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    # The cost for a* seach is f(x) = g(x) + h(x)
+    # The backward cost defined in UCS (problem.getCostOfActions([x[1] for x in path][1:])) is g(x)
+    # The heuristic is h(x), heuristic(state, problem),
+    # where state = path[-1][0], which is the first element in the last tuple of the path
+    cost = lambda path: problem.getCostOfActions([x[1] for x in path][1:]) + heuristic(path[-1][0], problem)
+
+    # Construct an empty priority queue that sorts using f(x)
+    pq = util.PriorityQueueWithFunction(cost)
+
+    # A* is general graph search with the PriorityQueue sorting by the f(x) as the data structure
+    return generalGraphSearch(problem, pq)
 
 
 # Abbreviations
