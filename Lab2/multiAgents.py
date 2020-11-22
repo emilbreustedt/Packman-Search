@@ -78,14 +78,17 @@ class ReflexAgent(Agent):
         newScaredTimes = [
             ghostState.scaredTimer for ghostState in newGhostStates]
 
+        # get closest ghost
         closestghost = min(
             [manhattanDistance(newPos, ghost.getPosition()) for ghost in newGhostStates])
 
+        # get distance to closest ghost
         if closestghost:
-            ghost_dist = -10/closestghost
+            ghost_dist = 10/closestghost
         else:
-            ghost_dist = -1000
+            ghost_dist = 500
 
+       # get closest food
         foodList = newFood.asList()
         if foodList:
             closestfood = min([manhattanDistance(newPos, food)
@@ -93,8 +96,8 @@ class ReflexAgent(Agent):
         else:
             closestfood = 0
 
-        # large weight to number of food left
-        return (-2 * closestfood) + ghost_dist - (100*len(foodList))
+        # calculate return value with large weighing the food left
+        return -1 * closestfood - ghost_dist - 50 * len(foodList)
 
 
 def scoreEvaluationFunction(currentGameState):
@@ -352,7 +355,7 @@ def betterEvaluationFunction(currentGameState):
 
     closestGhost = min([manhattanDistance(newPos, ghost.getPosition())
                         for ghost in newGhostStates])
-
+    # in addition to q1 the closest capsule is added as well
     if newCapsules:
         closestCapsule = min([manhattanDistance(newPos, caps)
                               for caps in newCapsules])
@@ -360,14 +363,14 @@ def betterEvaluationFunction(currentGameState):
         closestCapsule = 0
 
     if closestCapsule:
-        closest_capsule = -3 / closestCapsule
+        closest_capsule = -3/closestCapsule
     else:
         closest_capsule = 100
 
     if closestGhost:
-        ghost_distance = -2 / closestGhost
+        ghost_distance = 2/closestGhost
     else:
-        ghost_distance = -500
+        ghost_distance = 500
 
     foodList = newFood.asList()
     if foodList:
@@ -375,8 +378,7 @@ def betterEvaluationFunction(currentGameState):
                            for food in foodList])
     else:
         closestFood = 0
-
-    return -2 * closestFood + ghost_distance - 10 * len(foodList) + closest_capsule
+    return -2 * closestFood - ghost_distance - 10 * len(foodList) + closest_capsule
 
 
 # Abbreviation
