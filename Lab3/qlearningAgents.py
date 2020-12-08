@@ -211,8 +211,7 @@ class ApproximateQAgent(PacmanQAgent):
                                    self.getQValue(state, action))
         # update weights
         for feature in featureVector:
-            self.weights[feature] = self.weights[feature] + \
-                difference * featureVector[feature]
+            self.weights[feature] += difference * featureVector[feature]
 
     def final(self, state):
         "Called at the end of each game."
