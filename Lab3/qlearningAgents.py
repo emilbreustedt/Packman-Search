@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -16,7 +16,10 @@ from game import *
 from learningAgents import ReinforcementAgent
 from featureExtractors import *
 
-import random,util,math
+import random
+import util
+import math
+
 
 class QLearningAgent(ReinforcementAgent):
     """
@@ -38,6 +41,7 @@ class QLearningAgent(ReinforcementAgent):
         - self.getLegalActions(state)
           which returns legal actions for a state
     """
+
     def __init__(self, **args):
         "You can initialize Q-values here..."
         ReinforcementAgent.__init__(self, **args)
@@ -52,7 +56,6 @@ class QLearningAgent(ReinforcementAgent):
           or the Q node value otherwise
         """
         return self.Qvalues[(state, action)]
-
 
     def computeValueFromQValues(self, state):
         """
@@ -124,7 +127,8 @@ class QLearningAgent(ReinforcementAgent):
           it will be called on your behalf
         """
         qValue = self.Qvalues[(state, action)]
-        qValue = ((1 - self.alpha) * qValue) + self.alpha * (reward + self.discount * self.computeValueFromQValues(nextState))
+        qValue = ((1 - self.alpha) * qValue) + self.alpha * (reward +
+                                                             self.discount * self.computeValueFromQValues(nextState))
         self.Qvalues[(state, action)] = qValue
 
     def getPolicy(self, state):
@@ -137,7 +141,7 @@ class QLearningAgent(ReinforcementAgent):
 class PacmanQAgent(QLearningAgent):
     "Exactly the same as QLearningAgent, but with different default parameters"
 
-    def __init__(self, epsilon=0.05,gamma=0.8,alpha=0.2, numTraining=0, **args):
+    def __init__(self, epsilon=0.05, gamma=0.8, alpha=0.2, numTraining=0, **args):
         """
         These default parameters can be changed from the pacman.py command line.
         For example, to change the exploration rate, try:
@@ -161,8 +165,8 @@ class PacmanQAgent(QLearningAgent):
         informs parent of action for Pacman.  Do not change or remove this
         method.
         """
-        action = QLearningAgent.getAction(self,state)
-        self.doAction(state,action)
+        action = QLearningAgent.getAction(self, state)
+        self.doAction(state, action)
         return action
 
 
@@ -174,6 +178,7 @@ class ApproximateQAgent(PacmanQAgent):
        and update.  All other QLearningAgent functions
        should work as is.
     """
+
     def __init__(self, extractor='IdentityExtractor', **args):
         self.featExtractor = util.lookup(extractor, globals())()
         PacmanQAgent.__init__(self, **args)
@@ -187,15 +192,27 @@ class ApproximateQAgent(PacmanQAgent):
           Should return Q(state,action) = w * featureVector
           where * is the dotProduct operator
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        featureVector = self.featExtractor.getFeatures(
+            state, action)  # get feature vector
+        Q = 0  # start at Q = 0
+        for feature in featureVector:
+            # sum up w * featureVector
+            Q += self.weights[feature] * featureVector[feature]
+        return Q
 
     def update(self, state, action, nextState, reward):
         """
            Should update your weights based on transition
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        # get feature vector
+        featureVector = self.featExtractor.getFeatures(state, action)
+        # set the difference
+        difference = self.alpha * ((reward + self.discount * self.getValue(nextState)) -
+                                   self.getQValue(state, action))
+        # update weights
+        for feature in featureVector.keys():
+            self.weights[feature] = self.weights[feature] + \
+                difference * featureVector[feature]
 
     def final(self, state):
         "Called at the end of each game."
