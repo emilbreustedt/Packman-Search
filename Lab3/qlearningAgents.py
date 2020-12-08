@@ -210,7 +210,7 @@ class ApproximateQAgent(PacmanQAgent):
         difference = self.alpha * ((reward + self.discount * self.getValue(nextState)) -
                                    self.getQValue(state, action))
         # update weights
-        for feature in featureVector.keys():
+        for feature in featureVector:
             self.weights[feature] = self.weights[feature] + \
                 difference * featureVector[feature]
 
